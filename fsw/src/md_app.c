@@ -116,7 +116,7 @@ void MD_AppMain(void)
                     if (ActualLength != sizeof(MD_NoArgsCmd_t))
                     {
                         CFE_EVS_SendEvent(MD_MSG_LEN_ERR_EID, CFE_EVS_EventType_ERROR,
-                                          "Msg with Bad length Rcvd: ID = 0x%08lX, Exp Len = %u, Len = %d",
+                                          "Msgs with Bad length Rcvd: ID = 0x%08lX, Exp Len = %u, Len = %d",
                                           (unsigned long)CFE_SB_MsgIdToValue(MessageID),
                                           (unsigned int)sizeof(MD_NoArgsCmd_t), (int)ActualLength);
                     }
