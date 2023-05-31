@@ -54,7 +54,7 @@ MD_AppData_t MD_AppData;
 void MD_AppMain(void)
 {
     CFE_SB_MsgId_t   MessageID    = CFE_SB_INVALID_MSG_ID;
-    int32            Status       = CFE_SUCCESS;
+    CFE_Status_t     Status       = CFE_SUCCESS;
     uint8            TblIndex     = 0;
     CFE_SB_Buffer_t *BufPtr       = NULL;
     size_t           ActualLength = 0;
@@ -169,12 +169,12 @@ void MD_AppMain(void)
 
 /******************************************************************************/
 
-int32 MD_AppInit(void)
+CFE_Status_t MD_AppInit(void)
 {
     /*
     ** Locals
     */
-    int32 Status = CFE_SUCCESS;
+    CFE_Status_t Status = CFE_SUCCESS;
 
     MD_AppData.CmdCounter = 0;
     MD_AppData.ErrCounter = 0;
@@ -185,17 +185,16 @@ int32 MD_AppInit(void)
     /* Register for event services...*/
     Status = CFE_EVS_Register(NULL, 0, CFE_EVS_NO_FILTER);
 
-    if (Status != CFE_SUCCESS)
-    {
-        CFE_ES_WriteToSysLog("MD_APP:Call to CFE_EVS_Register Failed:RC=%d\n", Status);
-    }
-
-    /*
-    ** Set up for Software Bus Services
-    */
     if (Status == CFE_SUCCESS)
     {
+        /*
+        ** Set up for Software Bus Services
+        */
         Status = MD_InitSoftwareBusServices();
+    }
+    else
+    {
+        CFE_ES_WriteToSysLog("MD_APP:Call to CFE_EVS_Register Failed:RC=%d\n", Status);
     }
 
     /*
@@ -243,10 +242,10 @@ void MD_InitControlStructures(void)
 }
 
 /******************************************************************************/
-int32 MD_InitSoftwareBusServices(void)
+CFE_Status_t MD_InitSoftwareBusServices(void)
 {
-    int32  Status = CFE_SUCCESS;
-    uint16 TblIndex;
+    CFE_Status_t Status = CFE_SUCCESS;
+    uint16       TblIndex;
 
     /*
     ** Initialize housekeeping telemetry packet (clear user data area)
@@ -271,16 +270,11 @@ int32 MD_InitSoftwareBusServices(void)
     */
     Status = CFE_SB_CreatePipe(&MD_AppData.CmdPipe, MD_PIPE_DEPTH, MD_PIPE_NAME);
 
-    if (Status != CFE_SUCCESS)
-    {
-        CFE_EVS_SendEvent(MD_CREATE_PIPE_ERR_EID, CFE_EVS_EventType_ERROR, "Failed to create pipe.  RC = %d", Status);
-    }
-
-    /*
-    ** Subscribe to Housekeeping request commands
-    */
     if (Status == CFE_SUCCESS)
     {
+        /*
+         ** Subscribe to Housekeeping request commands
+         */
         Status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(MD_SEND_HK_MID), MD_AppData.CmdPipe);
 
         if (Status != CFE_SUCCESS)
@@ -288,6 +282,10 @@ int32 MD_InitSoftwareBusServices(void)
             CFE_EVS_SendEvent(MD_SUB_HK_ERR_EID, CFE_EVS_EventType_ERROR, "Failed to subscribe to HK requests  RC = %d",
                               Status);
         }
+    }
+    else
+    {
+        CFE_EVS_SendEvent(MD_CREATE_PIPE_ERR_EID, CFE_EVS_EventType_ERROR, "Failed to create pipe.  RC = %d", Status);
     }
 
     /*
@@ -323,9 +321,9 @@ int32 MD_InitSoftwareBusServices(void)
 
 /******************************************************************************/
 
-int32 MD_InitTableServices(void)
+CFE_Status_t MD_InitTableServices(void)
 {
-    int32                Status           = CFE_SUCCESS;
+    CFE_Status_t         Status           = CFE_SUCCESS;
     int32                GetAddressResult = 0;
     uint8                TblIndex;
     bool                 RecoveredValidTable = true; /* for current table */
@@ -495,9 +493,9 @@ int32 MD_InitTableServices(void)
 }
 
 /******************************************************************************/
-int32 MD_ManageDwellTable(uint8 TblIndex)
+CFE_Status_t MD_ManageDwellTable(uint8 TblIndex)
 {
-    int32                Status           = CFE_SUCCESS;
+    CFE_Status_t         Status           = CFE_SUCCESS;
     int32                GetAddressResult = 0;
     bool                 FinishedManaging = false;
     MD_DwellTableLoad_t *MD_LoadTablePtr  = 0;

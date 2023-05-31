@@ -150,7 +150,8 @@ int32 MD_TableValidationFunc(void *TblPtr)
 }
 
 /******************************************************************************/
-int32 MD_ReadDwellTable(const MD_DwellTableLoad_t *TblPtr, uint16 *ActiveAddrCountPtr, uint16 *SizePtr, uint32 *RatePtr)
+CFE_Status_t MD_ReadDwellTable(const MD_DwellTableLoad_t *TblPtr, uint16 *ActiveAddrCountPtr, uint16 *SizePtr,
+                               uint32 *RatePtr)
 {
     /* parameters cannot be NULL - checked by calling function */
 
@@ -332,20 +333,18 @@ void MD_CopyUpdatedTbl(MD_DwellTableLoad_t *MD_LoadTablePtr, uint8 TblIndex)
 }
 
 /******************************************************************************/
-int32 MD_UpdateTableEnabledField(uint16 TableIndex, uint16 FieldValue)
+CFE_Status_t MD_UpdateTableEnabledField(uint16 TableIndex, uint16 FieldValue)
 {
-    int32                Status          = CFE_SUCCESS;
+    CFE_Status_t         Status          = CFE_SUCCESS;
     MD_DwellTableLoad_t *MD_LoadTablePtr = NULL;
-    int32                GetAddressResult;
 
-    GetAddressResult = CFE_TBL_GetAddress((void *)&MD_LoadTablePtr, MD_AppData.MD_TableHandle[TableIndex]);
+    Status = CFE_TBL_GetAddress((void *)&MD_LoadTablePtr, MD_AppData.MD_TableHandle[TableIndex]);
 
-    if ((GetAddressResult != CFE_SUCCESS) && (GetAddressResult != CFE_TBL_INFO_UPDATED))
+    if ((Status != CFE_SUCCESS) && (Status != CFE_TBL_INFO_UPDATED))
     {
         CFE_EVS_SendEvent(MD_UPDATE_TBL_EN_ERR_EID, CFE_EVS_EventType_ERROR,
                           "MD_UpdateTableEnabledField, TableIndex %d: CFE_TBL_GetAddress Returned 0x%08x", TableIndex,
-                          GetAddressResult);
-        Status = GetAddressResult;
+                          Status);
     }
     else
     {
@@ -363,23 +362,21 @@ int32 MD_UpdateTableEnabledField(uint16 TableIndex, uint16 FieldValue)
 
 /******************************************************************************/
 
-int32 MD_UpdateTableDwellEntry(uint16 TableIndex, uint16 EntryIndex, uint16 NewLength, uint16 NewDelay,
-                               MD_SymAddr_t NewDwellAddress)
+CFE_Status_t MD_UpdateTableDwellEntry(uint16 TableIndex, uint16 EntryIndex, uint16 NewLength, uint16 NewDelay,
+                                      MD_SymAddr_t NewDwellAddress)
 {
-    int32                Status           = CFE_SUCCESS;
-    int32                GetAddressResult = 0;
-    MD_DwellTableLoad_t *MD_LoadTablePtr  = NULL;
-    MD_TableLoadEntry_t *EntryPtr         = NULL;
+    CFE_Status_t         Status          = CFE_SUCCESS;
+    MD_DwellTableLoad_t *MD_LoadTablePtr = NULL;
+    MD_TableLoadEntry_t *EntryPtr        = NULL;
 
     /* Get pointer to Table */
-    GetAddressResult = CFE_TBL_GetAddress((void *)&MD_LoadTablePtr, MD_AppData.MD_TableHandle[TableIndex]);
+    Status = CFE_TBL_GetAddress((void *)&MD_LoadTablePtr, MD_AppData.MD_TableHandle[TableIndex]);
 
-    if ((GetAddressResult != CFE_SUCCESS) && (GetAddressResult != CFE_TBL_INFO_UPDATED))
+    if ((Status != CFE_SUCCESS) && (Status != CFE_TBL_INFO_UPDATED))
     {
         CFE_EVS_SendEvent(MD_UPDATE_TBL_DWELL_ERR_EID, CFE_EVS_EventType_ERROR,
                           "MD_UpdateTableDwellEntry, TableIndex %d: CFE_TBL_GetAddress Returned 0x%08x", TableIndex,
-                          GetAddressResult);
-        Status = GetAddressResult;
+                          Status);
     }
     else
     {
@@ -412,21 +409,19 @@ int32 MD_UpdateTableDwellEntry(uint16 TableIndex, uint16 EntryIndex, uint16 NewL
 /******************************************************************************/
 #if MD_SIGNATURE_OPTION == 1
 
-int32 MD_UpdateTableSignature(uint16 TableIndex, char NewSignature[MD_SIGNATURE_FIELD_LENGTH])
+CFE_Status_t MD_UpdateTableSignature(uint16 TableIndex, char NewSignature[MD_SIGNATURE_FIELD_LENGTH])
 {
-    int32                Status          = CFE_SUCCESS;
+    CFE_Status_t         Status          = CFE_SUCCESS;
     MD_DwellTableLoad_t *MD_LoadTablePtr = NULL;
-    int32                GetAddressResult;
 
     /* Get pointer to Table */
-    GetAddressResult = CFE_TBL_GetAddress((void *)&MD_LoadTablePtr, MD_AppData.MD_TableHandle[TableIndex]);
+    Status = CFE_TBL_GetAddress((void *)&MD_LoadTablePtr, MD_AppData.MD_TableHandle[TableIndex]);
 
-    if ((GetAddressResult != CFE_SUCCESS) && (GetAddressResult != CFE_TBL_INFO_UPDATED))
+    if ((Status != CFE_SUCCESS) && (Status != CFE_TBL_INFO_UPDATED))
     {
         CFE_EVS_SendEvent(MD_UPDATE_TBL_SIG_ERR_EID, CFE_EVS_EventType_ERROR,
                           "MD_UpdateTableSignature, TableIndex %d: CFE_TBL_GetAddress Returned 0x%08x", TableIndex,
-                          GetAddressResult);
-        Status = GetAddressResult;
+                          Status);
     }
     else
     {
